@@ -26,7 +26,7 @@ INTERNAL_LDFLAGS = \
 C_FILES := $(shell find ./ -type f -name '*.c' | sort)
 OBJ := $(C_FILES:.c=.o)
 
-all: kernel.bin
+all: kernel.bin qemu
 
 kernel.bin: $(OBJ)
 	i686-elf-gcc $(OBJ) $(LDFLAGS) $(INTERNAL_LDFLAGS) -o binaries/kernel.bin
