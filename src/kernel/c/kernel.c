@@ -14,11 +14,17 @@ asm (
     "call main\n\t"
 );
 
+#include<stdint.h>
+void init_paging();
 
 void main() {
-	char* buffer=0xb8000;
-    char* end=0xb8fff;
-    for(char* c=buffer;c!=end;c++)*c='\0';
-    //*buffer='%';
-	while(1);
+    init_paging();
+    asm (
+        "push ebp\n\t"
+        "mov ebp, esp\n\t"
+        "mov eax, [esp+8]\n\t"
+        "mov cr3, eax\n\t"
+        "mov esp, ebp\n\t"
+        "pop ebp\n\t"
+    );
 }

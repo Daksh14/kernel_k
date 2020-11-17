@@ -4,4 +4,17 @@ version = "0.1.0"
 authors = ["Daksh14 <somilsharma627@gmail.com>"]
 edition = "2018"
 
-[dependencies]
+[lib]
+crate-type = ["staticlib"]
+path = "src/kernel/rust/main.rs"
+
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc"]
+
+[profile.dev]
+panic = "abort"
+overflow-checks = false
+
+[profile.release]
+panic = "abort"
+overflow-checks = false

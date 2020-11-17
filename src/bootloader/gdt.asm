@@ -16,7 +16,7 @@ start:
     db 0x0
 
  .data_segment:
- 	dw 0xFFFF
+ 	  dw 0xFFFF
     dw 0x0
     db 0x0
     db 10010010b

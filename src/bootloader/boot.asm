@@ -36,7 +36,7 @@ load_kernel:
 	call newline
 
 	mov bx, KERNEL_OFFSET
-	mov dh, 1
+	mov dh, 15
 	mov dl, [BOOT_DRIVE]
 	call disk_load
 
@@ -110,6 +110,9 @@ a20_line:
 enteringpmode:
     db 'Entering protected mode', 0
 
+nocpuid:
+	db 'No cupid', 0
+
 BOOT_DRIVE db 0
 
 %include 'bootloader/print.asm'
@@ -117,7 +120,6 @@ BOOT_DRIVE db 0
 %include 'bootloader/gdt.asm'
 
 [bits 32]
-;[extern main]
 
 Pmode:
 	mov		ax, 0x10
@@ -127,13 +129,8 @@ Pmode:
 	mov     gs, ax
 	mov		ss, ax
 
-	mov		esp, 90000h
-
-	call KERNEL_OFFSET
-
-string: db 'P' ,0
-
-%include 'bootloader/print_32.asm'
+	mov		esp, 0x7BFF
+	jmp KERNEL_OFFSET
 
 times 510 - ($-$$) db 0
 

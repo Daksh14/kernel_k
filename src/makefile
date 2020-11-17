@@ -1,5 +1,7 @@
 CC = i686-elf-gcc
 CFLAGS = -Os -pipe -Wall -Wextra
+CARGO = cargo xbuild
+RUST_TARGET = specification.json
 
 INTERNAL_CFLAGS = \
 	-ffreestanding \
@@ -23,27 +25,36 @@ INTERNAL_LDFLAGS = \
 	-static-libgcc \
 	-Tlinker.ld
 
+BIN_FOLDER = binaries
+RUST_O  = rust-0310d0f3743aaf87.o
+RUST_D  = rust-0310d0f3743aaf87.d
+BOOT_FINAL = boot.bin
+KERNEL_FINAL = kernel.bin
+OS_FINAL = kernel_k.bin
+
 C_FILES := $(shell find ./ -type f -name '*.c' | sort)
-OBJ := $(C_FILES:.c=.o)
+OBJ_C := $(C_FILES:.c=.o)
 
 all: kernel.bin qemu
 
-kernel.bin: $(OBJ)
-	i686-elf-gcc $(OBJ) $(LDFLAGS) $(INTERNAL_LDFLAGS) -o binaries/kernel.bin
-	nasm bootloader/boot.asm -o binaries/kernel_entry.bin
+kernel.bin: $(OBJ_C) rs
+	i686-elf-gcc  $(BIN_FOLDER)/$(RUST_O) $(OBJ_C) $(LDFLAGS) $(INTERNAL_LDFLAGS) -o $(BIN_FOLDER)/$(KERNEL_FINAL)
+	nasm bootloader/boot.asm -o $(BIN_FOLDER)/$(BOOT_FINAL)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INTERNAL_CFLAGS) -c $< -o $@
 
+rs:
+	$(CARGO) --target=$(RUST_TARGET) --release
+
 os.bin:
-	cat binaries/kernel_entry.bin binaries/kernel.bin > binaries/os.bin
+	cat $(BIN_FOLDER)/$(BOOT_FINAL) $(BIN_FOLDER)/$(KERNEL_FINAL) > $(BIN_FOLDER)/$(OS_FINAL)
 
 os.clean:
-	rm binaries/kernel.bin
-	rm binaries/kernel_entry.bin
+	rm $(BIN_FOLDER)/$(RUST_D) $(BIN_FOLDER)/$(RUST_O) $(BIN_FOLDER)/$(BOOT_FINAL) $(BIN_FOLDER)/$(KERNEL_FINAL) $(OBJ_C)
 
 qemu: os.bin os.clean
-	qemu-system-x86_64 binaries/os.bin
+	qemu-system-x86_64 -fda $(BIN_FOLDER)/$(OS_FINAL)
 
-clean:
-	rm binaries/*.bin
+clean: os.clean
+	rm $(BIN_FOLDER)/*.bin

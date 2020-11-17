@@ -1,5 +1,6 @@
 [build]
 target = "src/specification.json"
+rustflags = ["--emit=obj", "-o", "src/binaries/rust.o"]
 
 [target.'cfg(target_os = "none")']
 runner = "bootimage runner"
